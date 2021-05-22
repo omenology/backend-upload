@@ -1,10 +1,13 @@
 // Library import
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
-import multer from "multer";
-import path from "path";
 
+import fs from "fs";
+
+const ww = fs.mkdirSync(__dirname + "/uploads", { recursive: true });
+console.log(ww);
 import connection from "./helpers/connection";
+import route from "./routes";
 
 // init app
 const app: Express = express();
@@ -16,22 +19,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// static folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// multer config
-const storage = multer.diskStorage({
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + new Date().getTime() + ".jpg");
-  },
-  destination: (req, file, cb) => {
-    cb(null, "uploads");
-  },
-});
-const upload = multer({ storage });
-app.post("/upload", upload.single("file"), (req: Request, res: Response) => {
-  console.log(req.file);
-  res.status(200).send({ succes: true });
+// route
+app.use("/", route);
+app.use("*", (req, res) => {
+  res.status(404).send("Endpoint Not Found");
 });
 
 connection
